@@ -9,7 +9,6 @@ stable_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg --gpg-sign=55D15281"
 
 set -e
 set -u
-set -x
 
 function pullStableRemote() {
     local remote=$1
