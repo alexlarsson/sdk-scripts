@@ -16,10 +16,10 @@ stable_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg --gpg-sign=55D15281"
 nightly_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg-nightly --gpg-sign=82170E3D"
 
 runtime_regexp="^runtime/\(org.gnome.\(Sdk\|Platform\)\|org.freedesktop.\(Base\)\?\(Sdk\|Platform\)\)"
+gnome_runtime_regexp="^runtime/org.gnome.\(Sdk\|Platform\)"
 
 set -e
 set -u
-set -x
 
 function mergeRefs() {
     local destrepo=$1
@@ -69,7 +69,7 @@ function listNightlyRefs() {
 }
 
 function listNightlyRuntimeRefs() {
-    listNightlyRefs | grep ${runtime_regexp}
+    listNightlyRefs | grep ${gnome_runtime_regexp}
 }
 
 function listNightlyAppRefs() {
