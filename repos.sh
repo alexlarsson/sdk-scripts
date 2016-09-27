@@ -177,7 +177,7 @@ if $arg_merge_stable_runtimes; then
 fi
 
 if $arg_update_stable_runtimes; then
-    flatpak build-update-repo ${delta_args} ${stable_gpg_args} ${stable_runtime_repo}
+    flatpak build-update-repo --prune ${delta_args} ${stable_gpg_args} ${stable_runtime_repo}
 fi
 
 if $arg_merge_stable_apps; then
@@ -186,7 +186,7 @@ if $arg_merge_stable_apps; then
 fi
 
 if $arg_update_stable_apps; then
-    flatpak build-update-repo  ${delta_args} ${stable_gpg_args} ${stable_app_repo}
+    flatpak build-update-repo --prune ${delta_args} ${stable_gpg_args} ${stable_app_repo}
 fi
 
 if $arg_merge_nightly_runtimes; then
@@ -195,7 +195,7 @@ if $arg_merge_nightly_runtimes; then
 fi
 
 if $arg_update_nightly_runtimes; then
-    flatpak build-update-repo ${delta_args} ${nightly_gpg_args} ${nightly_runtime_repo}
+    flatpak build-update-repo --prune --prune-depth=10 ${delta_args} ${nightly_gpg_args} ${nightly_runtime_repo}
 fi
 
 if $arg_merge_nightly_apps; then
@@ -204,5 +204,5 @@ if $arg_merge_nightly_apps; then
 fi
 
 if $arg_update_nightly_apps; then
-    flatpak build-update-repo  ${delta_args} ${nightly_gpg_args} ${nightly_app_repo}
+    flatpak build-update-repo --prune --prune-depth=10 ${delta_args} ${nightly_gpg_args} ${nightly_app_repo}
 fi
