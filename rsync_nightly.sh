@@ -2,4 +2,6 @@
 
 cd /srv/gnome-sdk
 
-./repos.sh --pull-nightly --merge-nightly
+source ./env.sh
+
+flock lock ./repos.sh --pull-stable --pull-nightly --merge-nightly
