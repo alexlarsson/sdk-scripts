@@ -1,16 +1,24 @@
 #!/bin/sh
 
-stable_staging_repo=/srv/gnome-sdk/public_html/staging/repo
+if [ -L $0 ] ; then
+    DIR=$(dirname $(readlink -f $0)) ;
+else
+    DIR=$(dirname $0) ;
+fi
+
+HTML=$DIR/public_html
+
+stable_staging_repo=$HTML/staging/repo
 stable_remotes="sdkbuilder1 aarch64-stable arm-stable"
 
-nightly_staging_repo=/srv/gnome-sdk/public_html/staging/repo-nightly
+nightly_staging_repo=$HTML/staging/repo-nightly
 nightly_remotes="sdkbuilder1 aarch64-unstable arm-unstable"
 
-stable_runtime_repo=/srv/gnome-sdk/public_html/repo
-stable_app_repo=/srv/gnome-sdk/public_html/repo-apps
+stable_runtime_repo=$HTML/repo
+stable_app_repo=$HTML/repo-apps
 
-nightly_runtime_repo=/srv/gnome-sdk/public_html/nightly/repo
-nightly_app_repo=/srv/gnome-sdk/public_html/nightly/repo-apps
+nightly_runtime_repo=$HTML/nightly/repo
+nightly_app_repo=$HTML/nightly/repo-apps
 
 stable_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg --gpg-sign=55D15281"
 nightly_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg-nightly --gpg-sign=82170E3D"
