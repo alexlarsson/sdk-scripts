@@ -6,7 +6,13 @@ else
     DIR=$(dirname $0) ;
 fi
 
+set -e
+set -u
+
 HTML=$DIR/public_html
+
+runtime_regexp="^runtime/\(org.gnome.\(Sdk\|Platform\)\|org.freedesktop.\(Base\)\?\(Sdk\|Platform\)\)"
+gnome_runtime_regexp="^runtime/org.gnome.\(Sdk\|Platform\)"
 
 stable_staging_repo=$HTML/staging/repo
 stable_remotes="sdkbuilder1 aarch64-stable arm-stable"
@@ -23,11 +29,81 @@ nightly_app_repo=$HTML/nightly/repo-apps
 stable_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg --gpg-sign=55D15281"
 nightly_gpg_args="--gpg-homedir=/srv/gnome-sdk/gnupg-nightly --gpg-sign=82170E3D"
 
-runtime_regexp="^runtime/\(org.gnome.\(Sdk\|Platform\)\|org.freedesktop.\(Base\)\?\(Sdk\|Platform\)\)"
-gnome_runtime_regexp="^runtime/org.gnome.\(Sdk\|Platform\)"
+STABLE_LIST=()
+NIGHTLY_LIST=()
+declare -A REPO
+declare -A REMOTES
+declare -A MATCH_BRANCHES
+declare -A NOMATCH_BRANCHES
 
-set -e
-set -u
+STABLE_LIST+=("stable-fdo")
+REPO["stable-fdo"]="$stable_staging_repo"
+REMOTES["stable-fdo"]="sdkbuilder1 aarch64-stable-3-22 arm-stable-3-22"
+MATCH_BRANCHES["stable-fdo"]="^runtime/org.freedesktop.(Base)?(Sdk|Platform)"
+NOMATCH_BRANCHES["stable-fdo"]=""
+
+STABLE_LIST+=("stable-gnome-3-20")
+REPO["stable-gnome-3-20"]="$stable_staging_repo"
+REMOTES["stable-gnome-3-20"]="sdkbuilder1 aarch64-stable-3-20 arm-stable-3-20"
+MATCH_BRANCHES["stable-gnome-3-20"]="^runtime/org.gnome.(Sdk|Platform).*/.*/3.20"
+NOMATCH_BRANCHES["stable-gnome-3-20"]=""
+
+STABLE_LIST+=("stable-gnome-3-22")
+REPO["stable-gnome-3-22"]="$stable_staging_repo"
+REMOTES["stable-gnome-3-22"]="sdkbuilder1 aarch64-stable-3-22 arm-stable-3-22"
+MATCH_BRANCHES["stable-gnome-3-22"]="^runtime/org.gnome.(Sdk|Platform).*/.*/3.22"
+NOMATCH_BRANCHES["stable-gnome-3-22"]=""
+
+STABLE_LIST+=("stable-gnome-apps")
+REPO["stable-gnome-apps"]="$stable_staging_repo"
+REMOTES["stable-gnome-apps"]="sdkbuilder1 aarch64-stable-3-22 arm-stable-3-22"
+NOMATCH_BRANCHES["stable-gnome-3-22"]="^runtime/org.(gnome|freedesktop).(Base)?(Sdk|Platform)"
+MATCH_BRANCHES["stable-gnome-3-22"]=""
+
+NIGHTLY_LIST+=("unstable-gnome")
+REPO["unstable-gnome"]="$nightly_staging_repo"
+REMOTES["unstable-gnome"]="sdkbuilder1 aarch64-unstable arm-unstable"
+MATCH_BRANCHES["unstable-gnome"]="^runtime/org.gnome.(Sdk|Platform).*/.*/master"
+NOMATCH_BRANCHES["unstable-gnome"]=""
+
+NIGHTLY_LIST+=("unstable-gnome-apps")
+REPO["unstable-gnome-apps"]="$nightly_staging_repo"
+REMOTES["unstable-gnome-apps"]="sdkbuilder1 aarch64-unstable arm-unstable"
+NOMATCH_BRANCHES["unstable-gnome-apps"]="^runtime/org.(gnome|freedesktop).(Base)?(Sdk|Platform)"
+MATCH_BRANCHES["unstable-gnome-apps"]=""
+
+function stage() {
+    local id=$1
+    echo $id
+    local repo=${REPO[$id]}
+    local remotes=${REMOTES[$id]}
+    local match_branches=${MATCH_BRANCHES[$id]}
+    local nomatch_branches=${NOMATCH_BRANCHES[$id]}
+
+    echo Staging $id
+    echo ============
+    for remote in $remotes; do
+        refs=""
+        for ref in $(ostree --repo=${repo} remote refs $remote  | sed "s/^.*\://" | grep -v ^appstream/ | LC_COLLATE=C sort); do
+            if [[ "$match_branches" != "" && "$ref" =~ $match_branches ]] ; then
+                refs="$refs $ref"
+            fi
+            if [[ "$nomatch_branches" != "" && ! "$ref" =~ $nomatch_branches ]] ; then
+                refs="$refs $ref"
+            fi
+        done
+        if [ "$refs" != "" ]; then
+            ostree --repo=${repo} pull --mirror ${remote} ${refs}
+        fi
+    done
+}
+
+function stageAll() {
+    local list=$1
+    for id in "$list"; do
+        stage $id
+    done
+}
 
 function mergeRefs() {
     local destrepo=$1
@@ -38,26 +114,12 @@ function mergeRefs() {
     flatpak build-commit-from --no-update-summary --src-repo=${srcrepo} ${gpg_args-} ${destrepo} ${refs-}
 }
 
-function pullStableRemote() {
-    local remote=$1
-    ostree --repo=${stable_staging_repo} pull --mirror ${remote}
-}
-
 function pullStableAll() {
-    for r in ${stable_remotes}; do
-	pullStableRemote ${r}
-    done
-}
-
-function pullNightlyRemote() {
-    local remote=$1
-    ostree --repo=${nightly_staging_repo} pull --mirror ${remote}
+    stageAll ${STABLE_LIST[@]}
 }
 
 function pullNightlyAll() {
-    for r in ${nightly_remotes}; do
-	pullNightlyRemote ${r}
-    done
+    stageAll ${NIGHTLY_LIST[@]}
 }
 
 function listStableRefs() {

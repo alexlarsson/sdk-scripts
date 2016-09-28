@@ -5,8 +5,14 @@ mode=archive-z2
 [remote "sdkbuilder1"]
 url=http://sdkbuilder1.gnome.org/repo/
 
-[remote "aarch64-stable"]
+[remote "aarch64-stable-3-20"]
 url=https://gnome2.codethink.co.uk/repo/
 
-[remote "arm-stable"]
+[remote "arm-stable-3-20"]
 url=https://gnome4.codethink.co.uk/repo/
+
+[remote "aarch64-stable-3-22"]
+url=https://gnome5.codethink.co.uk/repo/
+
+[remote "arm-stable-3-22"]
+url=https://gnome6.codethink.co.uk/repo/
