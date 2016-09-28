@@ -57,8 +57,8 @@ NOMATCH_BRANCHES["stable-gnome-3-22"]=""
 STABLE_LIST+=("stable-gnome-apps")
 REPO["stable-gnome-apps"]="$stable_staging_repo"
 REMOTES["stable-gnome-apps"]="sdkbuilder1 aarch64-stable-3-22 arm-stable-3-22"
-NOMATCH_BRANCHES["stable-gnome-3-22"]="^runtime/org.(gnome|freedesktop).(Base)?(Sdk|Platform)"
-MATCH_BRANCHES["stable-gnome-3-22"]=""
+NOMATCH_BRANCHES["stable-gnome-apps"]="^runtime/org.(gnome|freedesktop).(Base)?(Sdk|Platform)"
+MATCH_BRANCHES["stable-gnome-apps"]=""
 
 NIGHTLY_LIST+=("unstable-gnome")
 REPO["unstable-gnome"]="$nightly_staging_repo"
@@ -74,7 +74,6 @@ MATCH_BRANCHES["unstable-gnome-apps"]=""
 
 function stage() {
     local id=$1
-    echo $id
     local repo=${REPO[$id]}
     local remotes=${REMOTES[$id]}
     local match_branches=${MATCH_BRANCHES[$id]}
@@ -99,8 +98,8 @@ function stage() {
 }
 
 function stageAll() {
-    local list=$1
-    for id in "$list"; do
+    local list="$*"
+    for id in $list; do
         stage $id
     done
 }
@@ -115,11 +114,11 @@ function mergeRefs() {
 }
 
 function pullStableAll() {
-    stageAll ${STABLE_LIST[@]}
+    stageAll "${STABLE_LIST[@]}"
 }
 
 function pullNightlyAll() {
-    stageAll ${NIGHTLY_LIST[@]}
+    stageAll "${NIGHTLY_LIST[@]}"
 }
 
 function listStableRefs() {
