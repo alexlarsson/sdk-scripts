@@ -1,0 +1,12 @@
+[core]
+repo_version=1
+mode=archive-z2
+
+[remote "sdkbuilder1"]
+url=http://sdkbuilder1.gnome.org/repo/
+
+[remote "aarch64-stable"]
+url=https://gnome2.codethink.co.uk/repo/
+
+[remote "arm-stable"]
+url=https://gnome4.codethink.co.uk/repo/
